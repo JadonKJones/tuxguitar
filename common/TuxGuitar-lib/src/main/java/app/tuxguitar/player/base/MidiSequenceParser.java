@@ -517,7 +517,18 @@ public class MidiSequenceParser {
 			int usq = (int)(currMeasure.getTempo().getInUSQ() * 100.00 / this.tempoPercent );
 			sh.getSequence().addTempoInUSQ(tick, getInfoTrack(), usq);
 			if (this.timestampMap.isEmpty()) {
-				this.timestampMap.put(tick, 0l);
+				// song time (with repeats) of the first played measure, which may not be measure 1 (loop range / selection)
+				long t = 0;
+				MidiRepeatController fullSong = new MidiRepeatController(this.song, -1, -1);
+				while (!fullSong.finished()) {
+					TGMeasureHeader header = this.song.getMeasureHeader(fullSong.getIndex());
+					fullSong.process();
+					if (fullSong.shouldPlay()) {
+						if (header.getNumber() == currMeasure.getNumber()) break;
+						t += header.getTempo().getTicksInMillis(header.getLength());
+					}
+				}
+				this.timestampMap.put(tick, t);
 			} else {
 				long t = this.timestampMap.lastEntry().getValue();
 				Map.Entry<Long,TGTempo> lastTempoEntry = this.tempoMap.lastEntry();

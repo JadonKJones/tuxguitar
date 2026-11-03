@@ -130,6 +130,7 @@ import app.tuxguitar.app.action.impl.transport.TGTransportPlayStopAction;
 import app.tuxguitar.app.action.impl.transport.TGTransportSetLoopEHeaderAction;
 import app.tuxguitar.app.action.impl.transport.TGTransportSetLoopSHeaderAction;
 import app.tuxguitar.app.action.impl.transport.TGTransportStopAction;
+import app.tuxguitar.app.action.impl.transport.TGOpenBackingTrackDialogAction;
 import app.tuxguitar.app.action.impl.view.TGHideExternalBeatAction;
 import app.tuxguitar.app.action.impl.view.TGOpenMainToolBarSettingsDialogAction;
 import app.tuxguitar.app.action.impl.view.TGOpenViewAction;
@@ -645,6 +646,7 @@ public class TGActionConfigMap extends TGActionMap<TGActionConfig> {
 		this.map(TGCustomTemplateSelectAction.NAME, LOCKABLE | SYNC_THREAD);
 		this.map(TGCustomTemplateDeleteAction.NAME, LOCKABLE | SYNC_THREAD);
 		this.map(TGOpenTransportModeDialogAction.NAME, LOCKABLE | SYNC_THREAD |SHORTCUT);
+		this.map(TGOpenBackingTrackDialogAction.NAME, LOCKABLE | SYNC_THREAD | SHORTCUT);
 		this.map(TGOpenMarkerEditorAction.NAME, LOCKABLE | SYNC_THREAD |SHORTCUT);
 		this.map(TGOpenTransposeDialogAction.NAME, LOCKABLE | SYNC_THREAD |DISABLE_ON_PLAY | SHORTCUT);
 		this.map(TGToggleFretBoardEditorAction.NAME, LOCKABLE | SYNC_THREAD |SHORTCUT);

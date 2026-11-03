@@ -6,6 +6,7 @@ import app.tuxguitar.app.action.impl.transport.TGTransportPlayPauseAction;
 import app.tuxguitar.app.action.impl.transport.TGTransportSetLoopEHeaderAction;
 import app.tuxguitar.app.action.impl.transport.TGTransportSetLoopSHeaderAction;
 import app.tuxguitar.app.action.impl.transport.TGTransportStopAction;
+import app.tuxguitar.app.action.impl.transport.TGOpenBackingTrackDialogAction;
 import app.tuxguitar.app.system.icons.TGIconManager;
 import app.tuxguitar.app.view.component.tab.Tablature;
 import app.tuxguitar.app.view.component.tab.TablatureEditor;
@@ -31,6 +32,7 @@ public class TransportMenuItem extends TGMenuItem {
 	private UIMenuCheckableItem metronome;
 	private UIMenuCheckableItem countDown;
 	private UIMenuActionItem mode;
+	private UIMenuActionItem backingTrack;
 	private UIMenuCheckableItem loopSHeader;
 	private UIMenuCheckableItem loopEHeader;
 	private UIMenuCheckableItem highlightPlayedBeat;
@@ -65,6 +67,10 @@ public class TransportMenuItem extends TGMenuItem {
 		//--MODE--
 		this.mode = this.transportMenuItem.getMenu().createActionItem();
 		this.mode.addSelectionListener(this.createActionProcessor(TGOpenTransportModeDialogAction.NAME));
+
+		//--BACKING TRACK--
+		this.backingTrack = this.transportMenuItem.getMenu().createActionItem();
+		this.backingTrack.addSelectionListener(this.createActionProcessor(TGOpenBackingTrackDialogAction.NAME));
 
 		//--SEPARATOR--
 		this.transportMenuItem.getMenu().createSeparator();
@@ -116,6 +122,7 @@ public class TransportMenuItem extends TGMenuItem {
 		setMenuItemTextAndAccelerator(this.play, "transport.start", TGTransportPlayPauseAction.NAME);
 		setMenuItemTextAndAccelerator(this.stop, "transport.stop", TGTransportStopAction.NAME);
 		setMenuItemTextAndAccelerator(this.mode, "transport.mode", TGOpenTransportModeDialogAction.NAME);
+		setMenuItemTextAndAccelerator(this.backingTrack, "transport.backing-track", TGOpenBackingTrackDialogAction.NAME);
 		setMenuItemTextAndAccelerator(this.metronome, "transport.metronome", TGTransportMetronomeAction.NAME);
 		setMenuItemTextAndAccelerator(this.countDown, "transport.count-down", TGTransportCountDownAction.NAME);
 		setMenuItemTextAndAccelerator(this.loopSHeader, "transport.set-loop-start", TGTransportSetLoopSHeaderAction.NAME);

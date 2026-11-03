@@ -46,4 +46,18 @@ public class TestSequenceParser {
 		assertEquals(t, timestampMap.get(quarterTime*34));
 	}
 
+	@Test
+	public void testTimestampOfLoopStartsAtSongTime() throws IOException {
+		TGContext context = new TGContext();
+		TGSong song = new TestFileFormat20().readSong("tempo_20.tg", true).getSong();
+		MidiSequenceParser parser = new MidiSequenceParser(song, new TGSongManager(), 0);
+		parser.setSHeader(6);
+		parser.parse(new MidiSequenceHandlerImpl(new MidiSequencerImpl(context), 1));
+
+		// measures 1-2 at 110 bpm, then (3-4)*3 + 5 at 130 bpm: repeats before the loop count
+		long expected = 7 * 60 * 1000 / 110 + 21 * 60 * 1000 / 130;
+		long first = parser.getTimestampMap().firstEntry().getValue();
+		assertEquals(expected, first, 5);
+	}
+
 }

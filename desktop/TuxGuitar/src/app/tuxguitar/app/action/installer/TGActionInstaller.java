@@ -131,6 +131,7 @@ import app.tuxguitar.app.action.impl.transport.TGTransportPlayStopAction;
 import app.tuxguitar.app.action.impl.transport.TGTransportSetLoopEHeaderAction;
 import app.tuxguitar.app.action.impl.transport.TGTransportSetLoopSHeaderAction;
 import app.tuxguitar.app.action.impl.transport.TGTransportStopAction;
+import app.tuxguitar.app.action.impl.transport.TGOpenBackingTrackDialogAction;
 import app.tuxguitar.app.action.impl.view.TGHideExternalBeatAction;
 import app.tuxguitar.app.action.impl.view.TGOpenMainToolBarSettingsDialogAction;
 import app.tuxguitar.app.action.impl.view.TGOpenViewAction;
@@ -573,6 +574,7 @@ public class TGActionInstaller {
 		installAction(new TGCustomTemplateSelectAction(context));
 		installAction(new TGCustomTemplateDeleteAction(context));
 		installAction(new TGOpenTransportModeDialogAction(context));
+		installAction(new TGOpenBackingTrackDialogAction(context));
 		installAction(new TGOpenMarkerEditorAction(context));
 		installAction(new TGOpenTransposeDialogAction(context) );
 
