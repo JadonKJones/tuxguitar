@@ -5,6 +5,7 @@ import java.io.File;
 import app.tuxguitar.app.TuxGuitar;
 import app.tuxguitar.app.transport.TGBackingTrack;
 import app.tuxguitar.app.ui.TGApplication;
+import app.tuxguitar.app.view.component.table.TGTableViewer;
 import app.tuxguitar.app.util.TGFileChooser;
 import app.tuxguitar.app.view.controller.TGViewContext;
 import app.tuxguitar.app.view.dialog.file.TGFileChooserDialog;
@@ -16,6 +17,7 @@ import app.tuxguitar.ui.event.UISelectionListener;
 import app.tuxguitar.ui.layout.UITableLayout;
 import app.tuxguitar.ui.widget.UIButton;
 import app.tuxguitar.ui.widget.UILabel;
+import app.tuxguitar.ui.widget.UIScale;
 import app.tuxguitar.ui.widget.UISpinner;
 import app.tuxguitar.ui.widget.UIWindow;
 import app.tuxguitar.util.error.TGErrorManager;
@@ -106,6 +108,26 @@ public class TGBackingTrackDialog {
 		});
 		dialogLayout.set(latency, 3, 3, UITableLayout.ALIGN_FILL, UITableLayout.ALIGN_FILL, true, false, 1, 2);
 
+		//--VOLUME--
+		UILabel volumeLabel = uiFactory.createLabel(dialog);
+		volumeLabel.setText(TuxGuitar.getProperty("transport.backing-track.volume") + ":");
+		dialogLayout.set(volumeLabel, 4, 1, UITableLayout.ALIGN_LEFT, UITableLayout.ALIGN_CENTER, false, false, 1, 2);
+
+		final UIScale volume = uiFactory.createHorizontalScale(dialog);
+		volume.setMinimum(0);
+		volume.setMaximum(100);
+		volume.setIncrement(5);
+		volume.setValue(backingTrack.getVolume());
+		volume.setToolTipText(backingTrack.getVolume() + "%");
+		volume.addSelectionListener(new UISelectionListener() {
+			public void onSelect(UISelectionEvent event) {
+				backingTrack.setVolume(volume.getValue());
+				volume.setToolTipText(volume.getValue() + "%");
+				TGTableViewer.getInstance(context.getContext()).updateBackingTrack();
+			}
+		});
+		dialogLayout.set(volume, 4, 3, UITableLayout.ALIGN_FILL, UITableLayout.ALIGN_FILL, true, false, 1, 2);
+
 		//--CLOSE--
 		UIButton closeButton = uiFactory.createButton(dialog);
 		closeButton.setText(TuxGuitar.getProperty("close"));
@@ -114,13 +136,14 @@ public class TGBackingTrackDialog {
 				dialog.dispose();
 			}
 		});
-		dialogLayout.set(closeButton, 4, 4, UITableLayout.ALIGN_FILL, UITableLayout.ALIGN_FILL, false, false, 1, 1, 80f, 25f, null);
+		dialogLayout.set(closeButton, 5, 4, UITableLayout.ALIGN_FILL, UITableLayout.ALIGN_FILL, false, false, 1, 1, 80f, 25f, null);
 
 		this.updateFile(backingTrack);
 		TGDialogUtil.openDialog(dialog, TGDialogUtil.OPEN_STYLE_CENTER | TGDialogUtil.OPEN_STYLE_PACK);
 	}
 
 	private void updateFile(TGBackingTrack backingTrack) {
+		TGTableViewer.getInstance(this.context.getContext()).updateBackingTrack();
 		if(!this.fileLabel.isDisposed()) {
 			String fileName = backingTrack.getFileName();
 			this.fileLabel.setText(fileName != null ? fileName : TuxGuitar.getProperty("transport.backing-track.none"));

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import app.tuxguitar.app.TuxGuitar;
+import app.tuxguitar.app.transport.TGBackingTrack;
 import app.tuxguitar.app.util.TGContinousControlSelectionListener;
 import app.tuxguitar.app.util.TGContinuousControl;
 import app.tuxguitar.document.TGDocumentContextAttributes;
@@ -30,6 +31,8 @@ public class TGTableMixer {
 	private UITableLayout layout;
 	private UIFactory uiFactory;
 	private List<VolumeControl> volumeControls;
+	private UILabel backingTrackLabel;
+	private UIScale backingTrackScale;
 
 	public TGTableMixer(UIScrollBarPanel parent, UIFactory uiFactory, TGContext context) {
 		this.uiFactory = uiFactory;
@@ -64,31 +67,85 @@ public class TGTableMixer {
 		}
 
 		if (listControlChanged) {
-			// recreate everything
-			for (UIControl control : this.panel.getChildren()) {
-				control.dispose();
-			}
-			this.volumeControls.clear();
-			int nRow = 1;
-			for(TGChannel channel : newChannels) {
-				VolumeControl volumeControl = new VolumeControl(channel, context, this.uiFactory, this.panel);
-				this.layout.set(volumeControl.getLabel(), nRow,1, UITableLayout.ALIGN_RIGHT, UITableLayout.ALIGN_CENTER, false, false, 1,1, null, null, null);
-				this.layout.set(volumeControl.getScale(), UITableLayout.MAXIMUM_PACKED_WIDTH, 80f);
-				this.layout.set(volumeControl.getScale(), nRow,2, UITableLayout.ALIGN_RIGHT, UITableLayout.ALIGN_CENTER, false, false, 1,1, null, null, null);
-				nRow++;
-				this.volumeControls.add(volumeControl);
-			}
-			this.panel.layout();
+			this.createControls(newChannels);
 		}
 		else {
 			// unchanged list of controls, just update volumes
 			for (VolumeControl control : this.volumeControls) {
 				control.updateVolume();
 			}
+			this.updateBackingTrack();
 		}
 	}
 
+	// the row exists only while an audio file is loaded
+	public void updateBackingTrack() {
+		TGBackingTrack backingTrack = TGBackingTrack.getInstance(this.context);
+		if ((backingTrack.getFileName() != null) != (this.backingTrackScale != null)) {
+			List<TGChannel> channels = new ArrayList<TGChannel>();
+			for (VolumeControl control : this.volumeControls) {
+				channels.add(control.getChannel());
+			}
+			this.createControls(channels);
+		}
+		else if (this.backingTrackScale != null) {
+			this.backingTrackScale.setValue(backingTrack.getVolume());
+			this.backingTrackScale.setToolTipText(backingTrack.getVolume() + "%");
+		}
+	}
+
+	private void createControls(List<TGChannel> channels) {
+		// recreate everything
+		for (UIControl control : this.panel.getChildren()) {
+			control.dispose();
+		}
+		this.volumeControls.clear();
+		this.backingTrackLabel = null;
+		this.backingTrackScale = null;
+		int nRow = 1;
+		if (TGBackingTrack.getInstance(this.context).getFileName() != null) {
+			this.createBackingTrackControl();
+			this.layout.set(this.backingTrackLabel, nRow,1, UITableLayout.ALIGN_RIGHT, UITableLayout.ALIGN_CENTER, false, false, 1,1, null, null, null);
+			this.layout.set(this.backingTrackScale, UITableLayout.MAXIMUM_PACKED_WIDTH, 80f);
+			this.layout.set(this.backingTrackScale, nRow,2, UITableLayout.ALIGN_RIGHT, UITableLayout.ALIGN_CENTER, false, false, 1,1, null, null, null);
+			nRow++;
+		}
+		for(TGChannel channel : channels) {
+			VolumeControl volumeControl = new VolumeControl(channel, context, this.uiFactory, this.panel);
+			this.layout.set(volumeControl.getLabel(), nRow,1, UITableLayout.ALIGN_RIGHT, UITableLayout.ALIGN_CENTER, false, false, 1,1, null, null, null);
+			this.layout.set(volumeControl.getScale(), UITableLayout.MAXIMUM_PACKED_WIDTH, 80f);
+			this.layout.set(volumeControl.getScale(), nRow,2, UITableLayout.ALIGN_RIGHT, UITableLayout.ALIGN_CENTER, false, false, 1,1, null, null, null);
+			nRow++;
+			this.volumeControls.add(volumeControl);
+		}
+		this.panel.layout();
+	}
+
+	private void createBackingTrackControl() {
+		final TGBackingTrack backingTrack = TGBackingTrack.getInstance(this.context);
+
+		this.backingTrackLabel = this.uiFactory.createLabel(this.panel);
+		this.backingTrackLabel.setText(TuxGuitar.getProperty("transport.backing-track"));
+
+		final UIScale scale = this.uiFactory.createHorizontalScale(this.panel);
+		scale.setMinimum(0);
+		scale.setMaximum(100);
+		scale.setValue(backingTrack.getVolume());
+		scale.setToolTipText(backingTrack.getVolume() + "%");
+		scale.addSelectionListener(new UISelectionListener() {
+			@Override
+			public void onSelect(UISelectionEvent event) {
+				backingTrack.setVolume(scale.getValue());
+				scale.setToolTipText(scale.getValue() + "%");
+			}
+		});
+		this.backingTrackScale = scale;
+	}
+
 	public void updateInstrumentsNames() {
+		if (this.backingTrackLabel != null) {
+			this.backingTrackLabel.setText(TuxGuitar.getProperty("transport.backing-track"));
+		}
 		for (VolumeControl control : this.volumeControls) {
 			control.instrumentLabel.setText(control.getChannel().getName());
 		}

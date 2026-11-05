@@ -187,6 +187,13 @@ public class TGTableViewer implements TGEventListener {
 		}
 	}
 
+	public void updateBackingTrack(){
+		if(!isDisposed()){
+			this.mixer.updateBackingTrack();
+			this.volumeComposite.layout();
+		}
+	}
+
 	public void updateItems(){
 		this.resetTexts = true;
 		this.followScroll = true;

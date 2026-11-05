@@ -27,6 +27,7 @@ import javazoom.jl.decoder.SampleBuffer;
 public class TGBackingTrack {
 
 	private static final String KEY_LATENCY = "backing-track.latency";
+	private static final String KEY_VOLUME = "backing-track.volume";
 
 	private static final int HOP = 512;	// output frames per chunk
 	private static final int WINDOW = HOP * 2;
@@ -48,11 +49,13 @@ public class TGBackingTrack {
 	private volatile String fileName;
 	private volatile int offsetMs;
 	private volatile int latencyMs;
+	private volatile int volume;
 	private Feeder feeder;
 
 	private TGBackingTrack(TGContext context) {
 		this.context = context;
 		this.latencyMs = TGConfigManager.getInstance(context).getIntegerValue(KEY_LATENCY, 0);
+		this.volume = TGConfigManager.getInstance(context).getIntegerValue(KEY_VOLUME, 50);
 	}
 
 	public String getFileName() {
@@ -77,6 +80,18 @@ public class TGBackingTrack {
 		this.latencyMs = latencyMs;
 		TGConfigManager config = TGConfigManager.getInstance(this.context);
 		config.setValue(KEY_LATENCY, latencyMs);
+		config.save();
+	}
+
+	public int getVolume() {
+		return this.volume;
+	}
+
+	// percent of the file's original level, 0 to 100
+	public void setVolume(int volume) {
+		this.volume = volume;
+		TGConfigManager config = TGConfigManager.getInstance(this.context);
+		config.setValue(KEY_VOLUME, volume);
 		config.save();
 	}
 
@@ -262,11 +277,12 @@ public class TGBackingTrack {
 				long natural = this.prevSegment + HOP;
 				segment = (Math.abs(natural - nominal) <= 1 ? natural : this.bestAlignment(nominal, natural));
 			}
+			float gain = TGBackingTrack.this.volume / 100f;
 			for (int i = 0; i < HOP; i++) {
 				for (int c = 0; c < 2; c++) {
 					float value = this.tail[i * 2 + c] + this.sample(segment + i, c) * HANN[i];
 					this.tail[i * 2 + c] = this.sample(segment + HOP + i, c) * HANN[HOP + i];
-					int s = Math.max(Short.MIN_VALUE, Math.min(Short.MAX_VALUE, Math.round(value)));
+					int s = Math.max(Short.MIN_VALUE, Math.min(Short.MAX_VALUE, Math.round(value * gain)));
 					this.out[(i * 2 + c) * 2] = (byte) s;
 					this.out[(i * 2 + c) * 2 + 1] = (byte) (s >> 8);
 				}
